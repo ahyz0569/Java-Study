@@ -29,6 +29,8 @@
 
 ![img](http://wikidocs.net/images/page/256/compile.png)
 
+> 이미지 출처: https://wikidocs.net/887
+
 **1) 자바 설치**
 
 - command Prompt(cmd.exe)를 실행하여 자바 설치 확인
@@ -85,13 +87,17 @@ public class MyClass {
 
 JIT는 정적 컴파일러 만큼 빠르면서 인터프러터 언어의 빠른 응답속도를 추구
 
-###### 
+
 
 ## 5. JVM 구성 요소
 
 크게 **Class Loader, Runtime Data Areas, Excution Engine** 3가지로 구성되어 있음
 
 ![File:JvmSpec7.png](https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/JvmSpec7.png/800px-JvmSpec7.png)
+
+> 이미지 출처: https://commons.wikimedia.org/wiki/File:JvmSpec7.png
+
+
 
 #### 1) Class Loader
 
@@ -144,11 +150,19 @@ JRE는 컴파일된 자바 프로그램을 실행시킬 수 있는 자바 환경
 
 ![img](http://wikidocs.net/images/page/257/jre.jpg)
 
+> 이미지 출처: https://wikidocs.net/257
+
+
+
 #### **JDK(Java Development Kit)**
 
 JDK는 JRE + 개발을 위해 필요한 도구(javac, java등)들을 포함
 
 ![img](http://wikidocs.net/images/page/257/jdk.jpg)
+
+> 이미지 출처: https://wikidocs.net/257
+
+
 
 
 
