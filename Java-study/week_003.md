@@ -121,8 +121,13 @@ class operator_study{
         System.out.println("num1 & num2 = " + Integer.toBinaryString(num1 & num2));
         System.out.println("num1 | num2 = " + Integer.toBinaryString(num1 | num2));
         System.out.println("num1 ^ num2 = " + Integer.toBinaryString(num1 ^ num2));
+        
         System.out.println("~num1 = " + (~num1));
         System.out.println("~num2 = " + (~num2));
+        
+        System.out.println("~num1 = " + Integer.toBinaryString(~num1));
+        System.out.println("~num2 = " + Integer.toBinaryString(~num2));
+        
     }
 }
 ```
@@ -132,11 +137,24 @@ class operator_study{
 num1 & num2 = 100
 num1 | num2 = 11101
 num1 ^ num2 = 11001
+
 ~num1 = -22
 ~num2 = -13
 
 ~num1 = 11111111111111111111111111101010
 ~num2 = 11111111111111111111111111110011
+```
+
+``~``연산을 한 값을 ``Integer.toBinaryString``을 이용하여 출력하였더니 위와 같은 32비트 코드가 출력이 되었다.  NOT 연산을 수행한 결과를 정직하게 출력한 모습이다. 해당 결과를 2의 보수 표현 방법으로 변환하니 10진수 출력결과와 같은 값을 도출할 수 있었다.
+
+```
+~num1 = 1111 1111 1111 1111 1111 1111 1110 1010 // 출력 결과
+		0000 0000 0000 0000 0000 0000 0001 0101 // 모든 비트 반전
+		0000 0000 0000 0000 0000 0000 0001 0110 // 위의 결과에 1을 더함 (16+4+2 = 22): -22
+		
+~num2 = 1111 1111 1111 1111 1111 1111 1111 0011 // 출력 결과
+		0000 0000 0000 0000 0000 0000 0000 1100 // 모든 비트 반전
+		0000 0000 0000 0000 0000 0000 0000 1101 // 위의 결과에 1을 더함 (8+4+1 = 13): -13
 ```
 
 |  A   |  B   | A & B | A \| B | A ^ B |  ~A  |
@@ -151,6 +169,8 @@ num1 ^ num2 = 11001
 | ![비트 AND 연산](http://www.tcpschool.com/lectures/img_php_bitwise_and.png) | ![비트 OR 연산](http://www.tcpschool.com/lectures/img_php_bitwise_or.png) |
 |                                                              |                                                              |
 | ![비트 XOR 연산](http://www.tcpschool.com/lectures/img_php_bitwise_xor.png) | ![비트 NOT 연산](http://www.tcpschool.com/lectures/img_php_bitwise_not.png) |
+
+​								*< 이미지 출처: http://www.tcpschool.com/java/java_operator_bitwise >*
 
 ```java
 class operator_study{
@@ -334,6 +354,8 @@ a= 8, b= 6
 
 두 논리 연산자의 차이를 이해하고 활용한다면 다양한 결과를 도출할 수 있다고 함
 
+> 연산 수행여부에 따라 실행시간의 차이가 있을까 하여 ``System.currentTimeMillis()``를 이용해 연산 수행 시간을 측정해보았으나 큰 차이는 없었다고 한다.
+
 
 
 ## 5. instanceof
@@ -490,6 +512,34 @@ n1, n2, n3 = 7 일 때 연산결과
 
 ## 7. 화살표(->) 연산자
 
+화살표 연산자는 람다 표현식을 작성할 때 사용한다고 한다. 그렇다면 람다 표현식은 무엇일까
+
+#### 람다 표현식
+
+식별자 없이 실행가능한 함수로, 익명 함수라고도 불린다고 함. 함수(메서드)와 같이 동작하나 메서드를 만들지 않고 하나의 식으로 표현한 것임
+
+자바 8부터 람다 표현식을 지원하여 사용할 수 있게 되었다고 함
+
+**문법** :  ``(매개변수목록) -> {함수 몸체}`` 
+
+매개변수목록은 오른쪽 중괄호 블록을 실행하기 위해 필요한 값을 제공하는 역할을 함. ``->``는 매개 변수를 이용해서 중괄호 안에 있는 실행문을 수행한다는 뜻으로 해석하면 됨
+
+아래 코드는 전통적인 방식의 스레드 생성과 람다 표현식을 사용한 스레드 생성을 비교하는 예제임
+(스레드 생성에 대해서는 아직 잘 모르니 사용법만 이해하고 넘어가기로 한다)
+
+```java
+new Thread(new Runnable() {
+    public void run(){
+        System.out.println("전통적인 방식의 일회용 스레드 생성");
+    }
+}).start();
+
+// 람다 표현식 예시
+new Thread(() ->{
+    System.out.println("람다 표현식을 사용한 일회용 스레드 생성");
+}).start();
+```
+
 
 
 ## 8. 3항 연산자
@@ -560,6 +610,165 @@ class operator_study{
 
 ## 10. optional) Java 13. switch 연산자
 
+switch 문은 주어진 조건 값의 결과에 따라 프로그램이 다른 명령을 수행하도록 하는 조건문임
+
+자바 12버전서 부터 새로운 표현 방법이 소개되었고 13, 14를 거치면서 조금씩 변경이 되었다고 한다. 한번 자세히 알아보도록 하자. (자바 12, 13버전에선 preview 옵션이었다가 14에서는 표준이 된 것으로 보인다.)
+
+우선 switch 문의 전통적인 표현방식은 다음과 같다.
+
+```java
+/* 문법
+switch(조건값){
+    case 1:
+        조건 값이 1일 때 실행하고자 하는 명령문;
+        break;
+    case 2:
+        조건 값이 2일 때 실행하고자 하는 명령문;
+        break;
+    ...
+   	default:
+        조건 값이 어떠한 case절에도 해당하지 않을 때 실행하고자 하는 명령문;
+        break;        
+}
+*/
+switch (day) {
+    case MONDAY:
+    case FRIDAY:
+    case SUNDAY:
+        System.out.println(6);
+        break;
+    case TUESDAY:
+        System.out.println(7);
+        break;
+    case THURSDAY:
+    case SATURDAY:
+        System.out.println(8);
+        break;
+    case WEDNESDAY:
+        System.out.println(9);
+        break;
+}
+```
+
+기존의 switch문은 **불필요한 반복코드가 존재**하고, **다수의 case와 break가 존재**하여 개발자가 실수로 **break문을 빠트렸을 때, 해당 오류를 찾기 어렵다**는 단점이 있었다. 만약 break문이 누락된다면 조건 값에 해당하는 case 절뿐만 아니라 그 이후에 등장하는 모든 case 절과 default 절이 전부 실행되기 떄문에 기대와는 다른 결과를 얻게 된다.
+
+#### Switch 표현방식의 변화
+
+##### 1) 다수 조건 한 줄 표현 가능
+
+```java
+switch (day) {
+    case MONDAY, FRIDAY, SUNDAY -> System.out.println(6);
+    case TUESDAY                -> System.out.println(7);
+    case THURSDAY, SATURDAY     -> System.out.println(8);
+    case WEDNESDAY              -> System.out.println(9);
+}
+```
+
+위와 같이 여러 개의 조건을``,``로 구분하여 한줄에 작성할 수 있게 되었다. 또한, ``:``대신  ``-> ``를 사용할 수 있게 되었고 ``-> ``이후에는 실행할 코드를 작성할 수 있음. 
+
+##### 2) ``-> ``를 통한 값 리턴
+
+```java
+int numLetters;
+switch (day) {
+    case MONDAY:
+    case FRIDAY:
+    case SUNDAY:
+        numLetters = 6;
+        break;
+    case TUESDAY:
+        numLetters = 7;
+        break;
+    case THURSDAY:
+    case SATURDAY:
+        numLetters = 8;
+        break;
+    case WEDNESDAY:
+        numLetters = 9;
+        break;
+    default:
+        throw new IllegalStateException("Wat: " + day);
+}
+```
+
+기존 switch 문법에서는 반환값이 없어서, 특정 조건에 따라 값을 리턴하기 위해선 switch 문 이전에 변수를 선언하고 조건에 따라 값을 초기화 하는 식으로 작성해야 했다. 
+
+하지만 새로운 switch 문법에서는 ``->`` 를 통해 값을 반환할 수 있게 되었다. 그래서 위의 코드는 다음과 같이 수정이 가능해졌다.
+
+```java
+int numLetters = switch (day) {
+    case MONDAY, FRIDAY, SUNDAY -> 6;
+    case TUESDAY                -> 7;
+    case THURSDAY, SATURDAY     -> 8;
+    case WEDNESDAY              -> 9;
+};
+```
+
+그리고 1) 에서 사용된 예시 코드는 또 다음과 같은 표현으로 수정이 가능하다.
+
+```java
+System.out.println(
+	switch (day){
+        case MONDAY, FRIDAY, SUNDAY -> 6;
+        case TUESDAY				-> 7;
+        case THURSDAY, SATURDAY		-> 8;
+        case WEDNESDAY				-> 9;
+    });
+```
+
+##### 3) ``yield``를 통한 값 리턴
+
+앞선 코드에서는 ``->`` 뒤에 하나의 식 또는 단일 값을 가졌는데, 2줄 이상의 코드를 실행하고자 할 경우에는 ``{}``블록을 사용하여 코드를 작성하면 되고 ``yield``라는 키워드를 통해 값을 리턴해주면 된다.
+
+```java
+int j = switch (day) {
+    case MONDAY  -> 0;
+    case TUESDAY -> 1;
+    default      -> {
+        int k = day.toString().length();
+        int result = f(k);
+        yield result;	// 자바 12에서는 break result; 로 사용해야함
+    }
+};
+```
+
+참고로 자바 12에서는 ``break``키워드를 사용하여 값을 리턴하였으나, 13에서는 ``yield`` 키워드로 변경되었다.
+
+```java
+int j = switch (day) {
+    case MONDAY  -> 0;
+    case TUESDAY -> yield 1; // compile error 발생
+    default      -> { yield 2; } // 가능
+};
+```
+
+여기서 주의해야 할 점이 ``yield`` 키워드는 ``->``와 같이 사용될 때에는 반드시 ``{}``블록 내부에서만 사용이 가능하다.
+
+대신, 이전 switch 문의  ``case L:`` 표현방식을 사용할 경우에는 ``{}``블록 없이 ``yield`` 키워드를 사용할 수 있다.
+
+```java
+int result = switch (s) {
+    case "Foo": 
+        yield 1;
+    case "Bar":
+        yield 2;
+    default:
+        System.out.println("Neither Foo nor Bar, hmmm...");
+        yield 0;
+};
+```
+
+switch의 반환값이 따로 필요하지 않은 경우나, case가 switch로 들어오는 모든 인자를 커버하는 경우에는 defalut 항목을 따로 넣어주지 않아도 된다. 하지만 그렇지 않은 경우에는 default 케이스 코드를 작성해야 하며 그렇지 않으면 에러가 발생한다고 한다.
+
+그리고 13에서는 Preview 이기 때문에 컴파일 할 때 아래와 같이``--enable-preview`` 옵션을 지정해줘야 한다.
+
+```java
+javac --enable-preview --release 13 Example.java
+```
+
+
+
 
 
 ### 참조 URL
@@ -577,5 +786,15 @@ class operator_study{
 > https://blog.naver.com/ksseo63/221996960575
 >
 > https://blog.naver.com/rwans0397/220602620066
-
-
+>
+> https://coding-factory.tistory.com/266
+>
+> https://galid1.tistory.com/509
+>
+> https://coding-factory.tistory.com/265
+>
+> https://openjdk.java.net/jeps/354
+>
+> https://velog.io/@nunddu/Java-Switch-Expression-in-Java-14
+>
+> https://mkyong.com/java/java-13-switch-expressions/
