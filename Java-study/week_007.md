@@ -180,7 +180,7 @@ public class MyClass {
 
 4. ``private`` : 같은 클래스 멤버만 접근이 가능함, 외부에서 직접 접근할 수 없음
 
-
+<img src="week_007.assets/image-20210102045357738.png" alt="image-20210102045357738" style="zoom:80%;" />
 
 접근 범위를 많은 순으로 나열하면 다음과 같다.
 
@@ -210,4 +210,3 @@ public class MyClass {
 > https://ko.wikipedia.org/wiki/자바_패키지
 >
 > https://effectivesquid.tistory.com/entry/자바-클래스패스classpath란
-
