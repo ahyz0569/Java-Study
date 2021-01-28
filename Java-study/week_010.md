@@ -43,17 +43,21 @@ Thread를 알기에 앞서 함께 알아야 할 것이 process다.
 
 
 
-같은 작업을 수행하더라도 싱글쓰레드보다 멀티 쓰레드에서 작업 소요 시간이 조금 더 걸릴 수 있는데, 이는 **context switching** 이 일어나기 때문이다. 
+같은 작업을 수행하더라도 싱글쓰레드보다 멀티 쓰레드에서 작업 소요 시간이 조금 더 걸릴 수 있는데, 이는 **context switching**(문맥교환) 이 일어나기 때문이다. 
 
+- Context switching: 현재까지의 작업 상태나 다음 작업에 필요한 데이터 등을 저장하고 읽어오는 작업
 
+### 멀티쓰레드의 장단점
 
-멀티쓰레드의 장점
+- 장점
+  - 응답성이 증가된다(예: 카카오톡에서 사진을 업로드하면서 메세지를 주고받을 수 있음)
+  - 메모리 공유를 통해 자원을 효율적으로 쓸 수 있다
+  - 응답시간이 단축된다
 
-자원을 효율적으로 쓸 수 있음
-
-쓰레드의 I/O 블락킹(blocking)
-
-입출력시 작업 중단
+- 단점
+  - 동시에 작업을 하다가 충돌이 일어날 수 있다(데드락)
+  - 싱글 스레드를 실행중일 때는 오히려 시간 지연이 발생할 수 있다
+  - 디버깅이 다소 까다롭다(버그 발생 가능성 증가)
 
 
 
@@ -133,9 +137,7 @@ public class Thread01 {
 
 쓰레드의 실행 순서는 OS 스케줄러가 결정한다. 그리고 쓰레드의 실행 순서는 예측할 수 없는 불확실성을 가지고 있다.
 
-
-
-![image-20210123181325722](week_010.assets/image-20210123181325722.png)
+![image-20210128232056294](week_010.assets/image-20210128232056294.png)
 
 ``start()`` 메서드를 호출해야 새로운 호출 스택이 생성이 되며 ``main`` 메서드와 별개로 ``run()`` 메서드가 독립적으로 작업을 수행하게 된다.
 
@@ -307,7 +309,7 @@ public class DaemonThreadTest implements Runnable {
 | WAITING,<br />TIMED_WAITING | 쓰레드의 작업이 종료되지는 않았지만 실행불가능한 일시정지 상태<br />TIMED_WAITING은 일시정지 시간이 지정된 경우를 의미 |
 | TERMINATED                  | 쓰레드의 작업이 종료된 상태                                  |
 
-![image-20210123213516788](week_010.assets/image-20210123213516788.png)
+![image-20210128232207854](week_010.assets/image-20210128232207854.png)
 
 
 
@@ -335,10 +337,81 @@ public class DaemonThreadTest implements Runnable {
 
 멀티 쓰레드 프로세스에서는 쓰레드끼리 서로의 작업에 영향을 미칠 수 있는데, 이때 진행중인 작업이 다른 쓰레드에게 간섭받지 않도록 하기 위해서는 동기화가 필요하다.
 
-다른 쓰레드에게 간섭받지 않고자 하는 문장들을 '임계 영역'으로 설정하면, 이 임계영역에 락을 얻은 하나의 쓰레드만 출입이 가능하다.
+다른 쓰레드에게 간섭받지 않고자 하는 문장들을 **'임계 영역'**으로 설정하면, 이 임계영역에 **락(lock)**을 얻은 하나의 쓰레드만 출입이 가능하다.
 
 synchronized를 이용한 동기화 방법에는 두 가지가 있다.
 
-1. 메서드 전체를 임계 영역으로 지정
-2. 특정한 영역을 임계 영역으로 지정
+1. 메서드 전체를 임계 영역으로 지정: `public synchronized void ...()`
+2. 특정한 영역을 임계 영역으로 지정: ``synchronized(객체의 참조 변수){ ..... }``
 
+임계영역 설정은 최소화, 좁을 수록 좋다.
+
+```java
+class Account2 {
+    private int balance = 1000;
+
+    public synchronized int getBalance() {
+        return balance;
+    }
+
+    public synchronized void withdraw(int money) {  // 메서드 동기화
+        if (balance >= money) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {}
+            balance -= money;
+        }
+    } // withdraw
+}
+
+public class SynchronizedTest implements Runnable{
+
+    Account2 acc = new Account2();
+
+    @Override
+    public void run() {
+        while (acc.getBalance() > 0) {
+            // 100, 200, 300 중에서 임의로 선택해서 출금
+            int money = (int) (Math.random() * 3 + 1) * 100;
+            acc.withdraw(money);
+            System.out.println("balance = " + acc.getBalance());
+        }
+    }
+}
+
+class TestClass {
+    public static void main(String[] args) {
+        Runnable r = new SynchronizedTest();
+        new Thread(r).start();
+        new Thread(r).start();
+    }
+}
+```
+
+|            ``withdraw()``에 동기화 미적용 시 결과            |             ``withdraw()``에 동기화 적용 시 결과             |
+| :----------------------------------------------------------: | :----------------------------------------------------------: |
+| ![image-20210128220320882](week_010.assets/image-20210128220320882.png) | ![image-20210128220406447](week_010.assets/image-20210128220406447.png) |
+
+
+
+## 쓰레드의 데드락
+
+둘 이상의 쓰레드가 락(lock)을 획득하기 위해 기다릴 때, 락을 잡고 있는 쓰레드도 똑같이 다른 락을 기다리며 교착 상태에 놓이는 것을 말한다.
+
+예를 들어, thread1은 A의 락을 가지고 있는 상태에서 B의 락을 획득하려고 하고, thread2는 B의 락을 가진 상태에서 A의 락을 획득하려고 할 때 데드락이 발생한다. thread1은 절대 B의 락을 획득하지 못하고, thread2는 절대로 A의 락을 획득하지 못하기 때문이다.
+
+![Lightbox](https://media.geeksforgeeks.org/wp-content/uploads/22-2.png)
+
+​					< 이미지 출처: https://www.geeksforgeeks.org/deadlock-in-java-multithreading/ >
+
+쓰레드의 스케줄링은 예측할 수 없기 때문에 데드락이 언제 발생하는 지 예측할 수 없고 발생할 수 있는 가능성 때문에 멀티 쓰레드 프로그래밍의 주요 난점 중 하나라고 한다.
+
+
+
+### Reference URL
+
+> https://youtube.com/playlist?list=PLW2UjW795-f5JPTsYHGAawAck9cQRw5TD (남궁성의 자바의 정석)
+>
+> https://magi82.github.io/process-thread/
+>
+> https://parkcheolu.tistory.com/19
