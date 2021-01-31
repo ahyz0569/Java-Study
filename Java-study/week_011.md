@@ -33,12 +33,6 @@ enum 열거형이름 {상수명1, 상수명2, ... }
 enum Direction { EAST, SOUTH, WEST, NORTH }
 ```
 
-```java
-class Unit
-```
-
-열거형 상수의 비교에 ``==`` 연산자와 ``compareTo()``를 사용할 수 있으며, 비교연산자는 사용할 수 없다. 
-
 
 
 ### Enum 클래스(java.lang.Enum)의 메서드
@@ -72,7 +66,7 @@ class EnumEx{
 }
 ```
 
-
+- 예시 코드
 
 ```java
 enum Direction{ EAST, SOUTH, WEST, NORTH }
@@ -124,7 +118,7 @@ public class EnumTest {
 
 ![image-20210130181219159](week_011.assets/image-20210130181219159.png)
 
-앞선 예제를 통해 알 수 있듯이, 열거형 상수는 상수가 아니고 객체이기 때문에 비교연산자로 비교할 수 없고 비교를 위해선 ``compareTo()`` 메서드를 사용해야 한다.
+열거형 상수의 비교에 ``==`` 연산자와 ``compareTo()``를 사용할 수 있으며, 비교연산자는 사용할 수 없다. 앞선 예제를 통해 알 수 있듯이, 열거형 상수는 상수가 아니고 객체이기 때문에 비교연산자로 비교할 수 없고 비교를 위해선 ``compareTo()`` 메서드를 사용해야 한다.
 
 그리고 Enum 상수에 정수 값을 매칭할 때 ``ordinal()``을 사용할 수 있다. 하지만 ``ordinal()``을 사용할 경우, enum 상수 중간에 다른 값이 들어갈 경우 매칭된 값이 달라지는 매우 큰 부작용이 생긴다. 따라서. ``ordinal()`` 사용을 피해야한다.
 
@@ -136,7 +130,7 @@ public class EnumTest {
 enum Direction { EAST(1), SOUTH(5), WEST(-1), NORTH(10) }
 ```
 
-ENUM 상수에 원하는 값은 여러개도 가능하며, 괄호``()``를 사용하여 원하는 값을 넣으려먼 **인스턴스 변수**와 **생성자**를 새로 추가해줘야 한다. 
+Enum 상수에 원하는 값은 여러개도 가능하며, 괄호``()``를 사용하여 원하는 값을 넣으려먼 **인스턴스 변수**와 **생성자**를 새로 추가해줘야 한다. 
 
 그렇다. 사실 괄호``()``를 사용하는 것은 생성자를 호출하는 것이다.
 
@@ -213,6 +207,58 @@ public class EnumTest2 {
 
 
 
+## EnumSet
+
+EnumSet은 enum 타입에 사용하기 위한 특수한 Set 구현이다. 
+
+EnumSet은 내부적으로 bit vector로 표현되어 매우 효율적이며, 구현체를 숨길 수 있는 장점이 있다. 
+
+EnumSet을 구현하여 사용한 예시 코드는 다음과 같다.
+
+```java
+enum Style {
+    BOLD(10), ITALIC(20), UNDERLINE(30), STRIKETHROUGH(40);
+
+    private final int value;
+
+    Style(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}
+
+public class EnumSetTest {
+    public static void main(String[] args) {
+        EnumSet<Style> styles = EnumSet.allOf(Style.class);
+        System.out.println(styles.size());
+        System.out.println("styles = " + styles);
+
+        for (Style style : styles) {
+            System.out.println("style.name() = " + style.name() 
+                               + ", style.getValue() = " + style.getValue());
+        }
+        
+        EnumSet<Style> italic = EnumSet.of(Style.ITALIC);
+        System.out.println("italic = " + italic);
+
+        EnumSet<Style> none = EnumSet.noneOf(Style.class);
+        System.out.println("none = " + none);
+
+        EnumSet<Style> range = EnumSet.range(Style.BOLD, Style.UNDERLINE);
+        System.out.println("range = " + range);
+    }
+}
+```
+
+- 실행결과
+
+![image-20210131211948162](week_011.assets/image-20210131211948162.png)
+
+
+
 
 
 ### Reference URL
@@ -222,3 +268,5 @@ public class EnumTest2 {
 > http://www.tcpschool.com/java/java_api_enum
 >
 > https://programmingfbf7290.tistory.com/entry/enum-자료형
+>
+> https://johngrib.github.io/wiki/java-enum/#fn:api-enumset
