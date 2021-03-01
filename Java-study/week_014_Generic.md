@@ -17,7 +17,7 @@
 
 컴파일러에게 타입 정보를 제공함으로써, 컴파일시 타입을 체크해주는 기능이며 JDK 1.5부터 도입되었다.
 
-제네릭은 객체의 **타입 안정성**을 높이고 **형변환 생략이 가능**해 코드가 간결해지는 장점을 갖고 있다.
+제네릭은 객체의 **타입 안정성**을 높이고 **형변환(타입 캐스팅) 생략이 가능**해 코드가 간결해지는 장점을 갖고 있다.
 
 면밀히 말하자면, 제네릭은 런타임 에러인 ``ClassCastException`` (형변환에러) 예외를 컴파일 에러로 잡아내고자 고안된 기능이다. 다음 코드를 보자.
 
@@ -123,7 +123,7 @@ class Audio extends Product {}
 
 
 
-### 제네릭 타입 제한
+### 제네릭 타입 제한(바운디드 타입)
 
 - ``extends``로 대입할 수 있는 타입을 제한
 
@@ -144,11 +144,31 @@ class Audio extends Product {}
   class FruitBox<T extends Eatable> {}
   ```
 
-- 인터페이스와 클래스를 같이 쓸 때에는 ``&``연산자를 사용 ( ``,`` 연산자를 사용하지 않는다)
+- 여러 개의 바운드를 가질 수 있는데, 이 때에는 ``&``연산자를 사용하며, 인터페이스와 클래스를 같이 쓸 때에는 클래스를 먼저 작성해줘야 한다. (클래스 & 인터페이스 순) ( ``,`` 연산자를 사용하지 않는다)
 
   ```java
   class FruitBox<T extends Fruit & Eatable> {}
   ```
+
+
+
+### 와일드 카드
+
+제네릭 코드에서 와일드카드라고 불리는 물음표(``?``) 는 알려지지 않은 유형을 나타낸다. 와일드카드는 파라미터, 필드 또는 로컬 변수, 반환 타입 등 다양한 상황에서 사용될 수 있다. 와일드 카드는 일반 메서드 호출, 일반 클래스 인스턴스 생성 또는 슈퍼 타입에 대한 타입 인수로 사용되지 않는다. 
+
+| 종류                   | 표현              | 설명                                                   |
+| ---------------------- | ----------------- | ------------------------------------------------------ |
+| Upper Bounded Wildcard | ``<? extends T>`` | 와일드 카드의 상한 제한. T와 그 자손들만 가능          |
+| Lower Bounded Wildcard | ``<? super T>``   | 와일드 카드의 하한 제한. T와 그 조상들만 가능          |
+| Unbounded Wildcard     | ``<?>``           | 제한 없음. 모든 타입이 가능. <? extends Object>와 동일 |
+
+메서드의 매개변수에도 와일드 카드를 사용할 수 있다.
+
+```java
+static Juice makeJuice(FruitBox<? extends Fruit> box){
+    ...
+}
+```
 
 
 
@@ -161,7 +181,7 @@ class Audio extends Product {}
   ```java
   class Box<T>{
       static T item;	// 에러
-      static int compare(T t1, T t2) {}	// 에러
+      static int compare(T t1, T t2) {}
   }
   ```
 
@@ -177,25 +197,6 @@ class Audio extends Product {}
   }
   ```
 
-  
-
-### 와일드 카드
-
-다형성과 같이 하나의 참조 변수로 대입된 타입이 다른 객체를 참조 가능하다. 
-
-| 종류              | 설명                                                   |
-| ----------------- | ------------------------------------------------------ |
-| ``<? extends T>`` | 와일드 카드의 상한 제한. T와 그 자손들만 가능          |
-| ``<? super T>``   | 와일드 카드의 하한 제한. T와 그 조상들만 가능          |
-| ``<?>``           | 제한 없음. 모든 타입이 가능. <? extends Object>와 동일 |
-
-메서드의 매개변수에도 와일드 카드를 사용할 수 있다.
-
-```java
-static Juice makeJuice(FruitBox<? extends Fruit> box){
-    ...
-}
-```
 
 
 
@@ -255,8 +256,87 @@ static Juice makeJuice(FruitBox<? extends Fruit> box){
 
 
 
+### Type Erasure
+
+제네릭은 컴파일 시에 엄격한 타입 체크를 위해 도입되었다. 제네릭을 구현하기 위해 자바 컴파일러는 다음과 같은 Type erasure를 적용한다.
+
+- 타입 파라미터를 타입 제한이 있는 경우에는 지정한 바운디드 타입으로, 타입 제한이 없는 경우에는 ``Object``로 대체한다. 따라서 생성된 바이트 코드에는 일반적인 클래스, 인터페이스, 메소드만 포함되어 있다.
+- 타입 안전성을 유지하기 위해 필요한 경우 타입 캐스팅을 삽입한다.
+- 확장된 제네릭 타입의 경우 다형성을 유지하기 위해 브릿지 메서드를 생성한다.
+
+
+
+#### 제네릭 타입 제거
+
+컴파일러는 제네릭 타입을 제거하고 필요한 곳에 형변환을 넣는다. 
+
+타입 제한이 있는 경우에는 지정한 바운디드 타입으로 대체 된다. 
+
+```java
+class Box<T extends Fruit> {
+    void add(T t) { ... }
+}
+```
+
+위와 같이 작성된 코드는 컴파일 후, 
+
+```java
+class Box {
+    void add(Fruit t) { ... }
+}
+```
+
+와 같은 형태로 바뀐다. 
+
+타입 제한이 없는 경우에는 ``Object``로 대체한다.
+
+```java
+class Box<T> {
+    void add(T t){ ... }
+}
+```
+
+와 같은 코드는
+
+```java
+class Box {
+    void add(Object t) { ... }
+}
+```
+
+와 같은 형태로 변환된다.
+
+
+
+제네릭 타입 제거 후에 타입이 불일치하면, 형변환을 추가한다.
+
+```java
+class Box<T extends Fruit> {
+    T get(int i){
+        return list.get(i);
+    }
+}
+```
+
+와 같은 코드는
+
+```java
+class Box {
+    Fruit get(int i){
+        return (Fruit) list.get(i);
+    }
+}
+```
+
+와 같은 형태로 변환된다.
+
+
+
 
 
 ### Reference URL
 
-> https://www.youtube.com/channel/UC1IsspG2U_SYK8tZoRsyvfg
+> https://www.youtube.com/channel/UC1IsspG2U_SYK8tZoRsyvfg (자바의 정석)
+>
+> https://docs.oracle.com/javase/tutorial/java/generics/index.html
+
