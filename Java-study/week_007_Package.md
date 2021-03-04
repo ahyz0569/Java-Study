@@ -109,7 +109,7 @@ public class statictest {
 
 클래스패스란 확장자가 ``.class``인 클래스 파일을 찾는 경로를 의미한다. 즉, JVM이 프로그램을 실행할 때, 클래스파일을 찾는 데 기준이 되는 파일 경로를 말하는 것이다.
 
-클래스 패스를 지정하는 방법에는 환경변수 ``CLASSPATH``를 사용하는 법과, java runtim(java 또는 jre)에서 
+클래스 패스를 지정하는 방법에는 환경변수 ``CLASSPATH``를 사용하는 법과, java runtime(java 또는 jre)에서 
 ``-classpath`` 옵션을 사용하는 것 두 가지가 있다.
 
 
@@ -192,6 +192,51 @@ public class MyClass {
 | ``protected`` |         O          |         O          |         O          |      X       |
 | ``default``   |         O          |         O          |         X          |      X       |
 | ``private``   |         O          |         X          |         X          |      X       |
+
+
+
+
+
+## 캡슐화
+
+직접 접근을 막고 간접 접근을 허용하는 것
+
+**접근제어자를 사용하는 이유**
+
+- 외부로부터 데이터를 보호하기 위해서
+
+- 외부에는 불필요한. 내부적으로만 사용되는 부분을 감추기 위해서
+
+```java
+public class Time {
+    public int hour;
+    public int minute;
+    public int second;
+}
+Time t = new Time();
+t.hour = 25;	// 멤버 변수에 직접 접근
+```
+
+변수 ``hour``의 경우 통상적으로 0 ~ 23시 까지의 값이 입력되어야 하는데 ``t.hour = 25``와 같이 잘못된 값을 변수에 직접 접근하여 대입할 경우에는 이를 방지할 방법이 없다.
+
+따라서 접근 제어자를 사용해 외부에서 인스턴스 변수에 직접 접근은 막고 메서드를 이용한 간접 접근을 허용해야 한다.
+
+```java
+public class Time {
+    private int hour;
+    private int minute;
+    private int second;
+    
+    public void setHour(int hour){
+        if (hour < 0 || hour > 24) return;
+        this.hour = hour;
+    }
+}
+```
+
+코드를 이렇게 고치면 ``hour``의 값을 입력하려면 ``setHour()`` 메서드를 이용해 ``t.setHour(23)``과 같이 접근할 수 있게 된다. 그리고 ``setHour()``의 메서드 내에 유효한 값이 입력될 수 있도록 기능을 구현하여 부적절한 값이 입력되는 것을 방지할 수 있게 된다.
+
+접근 제어자의 범위는 최대한 좁혀놓고 필요에 따라 넓은 범위의 접근 제어자로 교체하는 것이 바람직하다.
 
 
 
