@@ -74,19 +74,13 @@ public class Week06{
      - 하지만, 생성자와 초기화 블록은 상속되지 않는다.
      - 부모 클래스에서 ``private``으로 정의된 멤버 변수는 상속은 가능하지만, **접근은 불가능**하다. 그래서 ``public``으로 선언한 ``setter``또는 ``getter``를 이용해 접근한다.
    - 상속 받은 기능 중 수정을 원하는 기능은 다시 재정의 할 수 있고**(Overriding)**, 필요한 속성이나 기능은 추가하여 작성할 수 있다. ~~객체 생성의 경우에는 재사용만 가능하고 변경,추가는 불가능 하다.~~
+   - 자손의 멤버 개수는 조상보다 적을 수 없다.(같거나 많다.)
 3. 생성자는 상속되지 않는다.
    - 생성자는 반드시 클래스 이름과 동일하게 써야 하는데, 상속하면 클래스 이름이 달라지기 때문
    - 그러나 재사용을 위해 하위 클래스에서 상위 클래스의 생성자를 호출할 수 있는데, 이는 ``super`` 키워드를 사용하면 가능하다. 단, 반드시 첫 줄에서만 가능하다.
 4. 상속의 횟수에 제한을 두지 않는다.
-5. 계층 구조의 최상위에 있는 클래스는 Object 클래스이다.
-
-
-
-자손은 조상의 모든 멤버를 상속받는다(생성자, 초기화블럭 제외)
-
-자손의 멤버 개수는 조상보다 적을 수 없다.(같거나 많다.)
-
-자손의 변경은 조상에 영향을 미치지 않는다.
+5. 자손의 변경은 조상에 영향을 미치지 않는다.
+6. 계층 구조의 최상위에 있는 클래스는 Object 클래스이다.
 
 
 
@@ -137,29 +131,47 @@ public class Week06{
 
 
 
-## Object
 
-모든 클래스의 최고 조상 클래스로, 부모가 없는 클래스는 자동적으로 Object 클래스를 상속받게 된다.
 
-모든 클래스는 Object 클래스에 정의된 11개의 메서드를 상속받는다. 11개의 메서드 중 대표적인 것으로 ``toString()``, ``equals(Object obj)``, ``hashCode()`` 등이 있다.
+## 다형성(Polymorphism)
 
-다음과 같이 클래스가 정의되어 있다고 가정하면, 
+여러 가지 형태를 가질 수 있는 능력으로 자바에서는 조상타입 참조 변수로 자손 타입 객체를 다루는 것이다.
 
 ```java
-class Point { ... }
-class Circle extends Point{ ... }
+class Tv {
+    boolean power;
+    int channel;
+    
+    void power(){	power = !power;	}
+    void channelUp(){	++channel;	}
+    void channelDown(){	--channel;	}
+}
+class SmartTv extends Tv {
+    String caption;
+    void caption(){	... }
+}
+
+/* 참조 변수와 인스턴스의 타입이 일치 */
+Tv t = new Tv();
+SmartTv s = new SmartTv();
+
+/* 다형성 */
+Tv t = new SmartTv();	// 타입 불일치 OK
+
+SmartTv s = new Tv();	// 에러, 허용 안됨.
 ```
 
-컴파일러가 다음과 같이 Circle 클래스에 ``extends Object`` 코드를 추가해준다.
+``Tv t = new SmartTv();`` 코드와 같이 조상 타입(Tv)의 참조 변수인 ``t``에 자손 타입 클래스 SmartTv의 인스턴스 (``new SmartTv()``)를 담을 수 있는 것을 다형성이라고 한다.
 
-```Java
-class Point extends Object { ... }
-class Circle extends Point{ ... }
-```
+이와 반대로 자손 타입의 참조변수로 조상 타입의 객체를 가리킬 수 없다.
 
+참조변수가 조상타입일 때와 자손타입일 때는 참조변수로 사용할 수 있는 멤버의 갯수가 달라지는 차이가 있다.
 
 
-## 메서드 오버라이딩(Overriding)
+
+
+
+## 메서드 오버라이딩(Method Overriding)
 
 상속 관계에 있는 부모 클래스에서 이미 정의된 메서드를 자식 클래스에서 재정의하는 것을 의미한다.
 
@@ -208,6 +220,65 @@ class Point3D extends Point {
 
 
 
+
+
+## 다이나믹 메소드 디스패치(Dynamic Method Dispatch)
+
+메소드 오버라이딩은 자바의 런타임 다형성을 지원하는 방법 중 하나다. 다이나믹 메소드 디스패치(Dynamic Method Dispatch)는 컴파일 타임이 아닌 런타임에 업캐스팅(Upcasting)된 자식 클래스의 오버라이딩 된 메서드를 호출하는 것이다.
+
+- 오버라이딩 된 메서드가 조상 클래스의 참조를 통해 호출될 때, 자바는 호출이 발생할 때 참조되는 객체의 유형에 기초하여 그 메서드의 어떤 버전(조상클래스/자손클래스)을 실행할 것인지를 결정한다. 따라서, 이러한 결정은 실행 시간에 이루어진다.
+- 런타임 시, 오버라이딩 된 메서드의 어떤 버전이 실행될 지는 참조되는 객체의 유형 (참조 변수의 유형이 아님)에 따라 달라진다.
+- 조상클래스의 참조 변수는 자손클래스 객체를 참조할 수 있다. 이것은 업캐스팅이라고도 한다. 자바는 이 사실을 사용하여 런타임에 재지정된 메소드에 대한 호출을 해결한다.
+
+다음과 같이 ``Super`` 클래스와 이를 상속받아 구현된 ``Sub1``과 ``Sub2`` 클래스가 있다고 가정하자.
+
+```java
+static class Super {
+    void print(){
+        System.out.println("super's print");
+    }
+}
+static class Sub1 extends Super {
+    @Override
+    void print(){
+        System.out.println("Sub1's print");
+    }
+}
+static class Sub2 extends Super {
+    @Override
+    void print(){
+        System.out.println("Sub2's print");
+    }
+}
+
+public static void main(String[] args) {
+    Super refer = new Super();
+    refer.print();
+    
+    refer = new Sub1();
+    refer.print();
+    
+    refer = new Sub2();
+    refer.print();
+}
+```
+
+이 코드의 실행결과는 다음과 같다.
+
+```
+super's print
+Sub1's print
+Sub2's print
+```
+
+``Super`` 타입의 참조 변수인 ``refer``에 자손 클래스 객체인 ``Sub1``과 ``Sub2``를 대입하면 업캐스팅이 이루어지고, ``refer``에는 각각의 객체가 대입될 때마다 자손 객체의 주소를 가리키게 된다.
+
+따라서, 조상클래스가 자손클래스에 의해 오버라이딩 된 메서드를 포함하는 경우, 다른 타입의 객체가 조상클래스 참조 변수를 통해 참조될 때, 다른 버전의 메소드가 실행된다. 
+
+
+
+
+
 ## 제어자(modifier)
 
 클래스와 클래스의 멤버(멤버 변수, 메서드)에 부가적인 의미를 부여한다.
@@ -225,8 +296,6 @@ public class Modifier{
 ```
 
 접근제어자를 제일 왼쪽에 쓰는 것이 관례다.
-
-
 
 ### static
 
@@ -271,6 +340,172 @@ AbstractTest a = new AbstractTest(); 	// 에러 발생(추상 클래스의 인�
 
 
 
+## 추상 클래스
+
+미완성(추상) 메서드를 갖고 있는 클래스
+
+주로 다른 클래스 작성에 도움을 주기 위한 클래스로 사용되며, 인스턴스 생성이 불가능 하다.
+
+상속을 통해 추상 메서드를 완성해야 인스턴스를 생성할 수 있다.
+
+```java
+abstract class Player {
+    abstract void play(int pos);
+    abstract void stop();
+}
+
+Player p = new Player();	// 에러
+
+class AudioPlayer extends Player {
+    void play(int pos){ ... }
+    void stop(){ ... }
+}
+
+AudioPlayer ap = new AudioPlayer();
+Player p = new AudioPlayer();	// 가능 (다형성)
+```
+
+
+
+### 추상 메서드
+
+미완성 메서드, 구현부(``{}``)가 없는 메서드
+
+```java
+abstract 리턴타입 메서드이름();
+```
+
+추상메서드의 선언은 ``abstract``라는 제어자를 맨 앞에 붙여줘야 하며, 메서드 이름 마지막에는 반드시 세미콜론``;``을 붙여주어야 한다.
+
+추상메서드는 꼭 필요하지만 자손마다 다르게 구현될 것으로 예상될 경우에 사용한다.
+
+```java
+abstract class Player {
+    abstract void play(int pos);
+    abstract void stop();
+}
+
+class AudioPlayer extends Player {
+    void play(int pos){ ... }	// 추상 메서드 구현
+    void stop(){ ... }			// 추상 메서드 구현
+}
+
+class AbstractPlayer extends Player{ 	// 에러
+    void play(int pos){ ... }	// 추상 메서드 구현
+}
+```
+
+``AudioPlayer`` 클래스의 경우에는 ``Player``라는 추상 클래스에 선언된 메서드를 구현하여 에러가 없는 것을 확인할 수 있다. 
+
+반면, ``AbstractPlayer``의 경우에는 ``play()``라는 메서드를 정상적으로 구현하였지만 ``stop()``이라는 메서드를 구현하지 않았기 때문에 미완성 클래스로 클래스 선언부에서 오류가 생기게 된다.
+
+때문에,  ``AbstractPlayer`` 클래스 선언부 맨 앞에 ``abstract`` 제어자를 붙여주어야 한다.
+
+**추상 메서드를 사용하는 이유**는 무엇일까?
+
+-> 필수 기능을 강제로 구현하게 하는 이점이 있다.
+
+
+
+### 추상클래스의 작성
+
+여러 클래스에 공통적으로 사용될 수 있는 추상클래스를 바로 작성하거나 기존 클래스의 공통 부분을 뽑아서 추상클래스를 만든다.
+
+다음과 같은 클래스들이 선언되었다고 하자.
+
+```java
+class Marine {
+    int x, y;						// 현재 위치
+    void move(int x, int y){ ... }	// 지정된 위치로 이동
+    void stop(){ ... }				// 현재 위치에 정지
+    void stimPack(){ ... }			// 스팀팩 사용
+}
+class Tank {
+    int x, y;						// 현재 위치
+    void move(int x, int y){ ... }	// 지정된 위치로 이동
+    void stop(){ ... }				// 현재 위치에 정지
+    void changeMode(){ ... }		// 공격모드 변환
+}
+class Dropship {
+    int x, y;						// 현재 위치
+    void move(int x, int y){ ... }	// 지정된 위치로 이동
+    void stop(){ ... }				// 현재 위치에 정지
+    void load(){ ... }				// 선택된 대상을 태움
+    void unload(){ ... }			// 선택된 대상을 태움
+}
+```
+
+``Marine``, ``Tank``, ``Dropship`` 이 세 클래스에는 현재 위치를 담고 있는 변수 ``x``, ``y``와 이동, 정지 기능을 담당하는``move()``, ``stop()`` 메서드(선언부가 일치해야 함)가 공통으로 포함되어 있는 것을 확인할 수 있다.
+
+이와 같이 공통된 부분을 추출하여 ``Unit`` 클래스로 묶어서 정의해 다음과 같이 코드를 변경할 수 있다.
+
+```java
+abstract class Unit {
+    int x, y;							// 현재 위치
+    abstract void move(int x, int y);	// 지정된 위치로 이동
+    void stop(){ ... }					// 현재 위치에 정지
+}
+class Marine extends Unit {    
+    void move(int x, int y){ ... }	// 지정된 위치로 이동
+    void stimPack(){ ... }			// 스팀팩 사용
+}
+class Tank extends Unit {    
+    void move(int x, int y){ ... }	// 지정된 위치로 이동    
+    void changeMode(){ ... }		// 공격모드 변환
+}
+class Dropship extends Unit {    
+    void move(int x, int y){ ... }	// 지정된 위치로 이동    
+    void load(){ ... }				// 선택된 대상을 태움
+    void unload(){ ... }			// 선택된 대상을 태움
+}
+```
+
+이와 같이 공통된 부분을 추상클래스로 묶어 정의한 후, 각 클래스에서 상속을 받아 필요에 따라 기능을 구현하는 형식으로 코드를 작성하면 코드가 간결해진다.
+
+또한 다음과 같이 하나의 배열에 여러 객체를 넣어 사용 가능한 다형성의 장점을 활용할 수 있게 된다.
+
+```java
+Unit[] group = new Unit[3];
+group[0] = new Marine();
+group[1] = new Tank();
+group[2] = new Dropship();
+
+for(int i = 0; i < group.length; i++){
+    group[i].move(100, 200);
+}
+```
+
+#### 추상클래스의 장점
+
+- 코드 작성이 쉽고 코드의 중복이 제거된다.
+- 추상화된 코드는 구체화된 코드보다 유연하기 때문에 코드 관리(변경)가 용이하다.
+
+
+
+
+
+## Object
+
+모든 클래스의 최고 조상 클래스로, 부모가 없는 클래스는 자동적으로 Object 클래스를 상속받게 된다.
+
+모든 클래스는 Object 클래스에 정의된 11개의 메서드를 상속받는다. 11개의 메서드 중 대표적인 것으로 ``toString()``, ``equals(Object obj)``, ``hashCode()`` 등이 있다.
+
+다음과 같이 클래스가 정의되어 있다고 가정하면, 
+
+```java
+class Point { ... }
+class Circle extends Point{ ... }
+```
+
+컴파일러가 다음과 같이 Circle 클래스에 ``extends Object`` 코드를 추가해준다.
+
+```Java
+class Point extends Object { ... }
+class Circle extends Point{ ... }
+```
+
+
+
 
 
 #### Reference URL
@@ -280,3 +515,8 @@ AbstractTest a = new AbstractTest(); 	// 에러 발생(추상 클래스의 인�
 > http://www.tcpschool.com/java/intro
 >
 > https://www.youtube.com/channel/UC1IsspG2U_SYK8tZoRsyvfg
+>
+> https://www.geeksforgeeks.org/dynamic-method-dispatch-runtime-polymorphism-java/
+>
+> https://velog.io/@maigumi/Dynamic-Method-Dispatch
+
