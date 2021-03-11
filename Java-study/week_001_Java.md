@@ -93,11 +93,7 @@ JIT는 정적 컴파일러 만큼 빠르면서 인터프러터 언어의 빠른 
 
 크게 **Class Loader, Runtime Data Areas, Excution Engine** 3가지로 구성되어 있음
 
-![File:JvmSpec7.png](https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/JvmSpec7.png/800px-JvmSpec7.png)
-
-> 이미지 출처: https://commons.wikimedia.org/wiki/File:JvmSpec7.png
-
-
+![JVM 구조](week_001.assets/image-20210311181435917.png)
 
 #### 1) Class Loader
 
@@ -105,7 +101,7 @@ JIT는 정적 컴파일러 만큼 빠르면서 인터프러터 언어의 빠른 
 
 #### 2) Runtime Data Area
 
-**Method Area**
+**Method Area**(= Class Area, Static Area)
 
 클래스 멤버 변수, 메소드 정보, Type(Class or Interface)정보, Constant Pool, static, final 변수 등이 생성됨, 상수 풀은 모든 Symbolic Reference를 포함
 
@@ -119,7 +115,7 @@ JIT는 정적 컴파일러 만큼 빠르면서 인터프러터 언어의 빠른 
 
 **PC Register**
 
-현재 쓰레드가 실행되는 부분의 주소와 명령을 저장하고 있음(CPU의 Register와 다름
+현재 쓰레드가 실행되는 부분의 주소와 명령을 저장하고 있음(CPU의 Register와 다름)
 
 **Native Method Stack**
 
@@ -173,3 +169,4 @@ JDK는 JRE + 개발을 위해 필요한 도구(javac, java등)들을 포함
 > - https://medium.com/@lazysoul/jvm-%EC%9D%B4%EB%9E%80-c142b01571f2
 > - https://wikidocs.net/257
 > - https://velog.io/@litien/JVM-%EA%B5%AC%EC%A1%B0
+> - https://asfirstalways.tistory.com/158
